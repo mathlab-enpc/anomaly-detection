@@ -1,0 +1,7 @@
+experiment_images
+density_experiment
+venv
+videos
+**/__pycache__
+density_first_derivative
+speed_experiment

@@ -1,6 +1,8 @@
 from Point import Point
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
+import os
 
 average_speedx = 10
 speed_std = int(average_speedx)
@@ -22,9 +24,6 @@ Different kinds of outliers
 8. TBD - Group creation?
 9. TBD - density variation with time?
 """
-
-
-
 
 """ Section 1: basic functions
 Random motion in a lobby-like frame
@@ -57,19 +56,19 @@ def bit_matrix(points, width, height):
     return matrix
 
 # displays bit matrix
-def bitmap(matrix):
-    n = np.shape(matrix)[0]
-    p = np.shape(matrix)[1]
-    abscissas = np.array([i for i in range (n)])
-    y0_lobby = np.array([0 for i in range (n)])
-    ymax_lobby = np.array([p - 1 for i in range (n)])
-    plt.plot(abscissas, y0_lobby, color = "r")
-    plt.plot(abscissas, ymax_lobby, color = "r")
-    for i in range (n):
-        for j in range (p):
-            if matrix[i,j] == 1:
-                plt.plot(i, j, "x", color = "b")
-    plt.show()
+def bitmap(matrix, t, folder_name):
+    n, p = matrix.shape
+    img = Image.new("1", (n, p))
+    pixels = img.load()
+    for i in range(n):
+        for j in range(p):
+            if matrix[i, j] == 1:
+                pixels[i, j] = 1
+    if not os.path.isdir('experiment_images'):
+        os.makedirs('experiment_images')
+    if not os.path.isdir(os.path.join('experiment_images', folder_name)):
+        os.makedirs(os.path.join('experiment_images', folder_name))
+    img.save(os.path.join('experiment_images', folder_name, "{}.png".format(t)))
 
 # some points can be out, handled in bit matrix
 def naturally_evolving_points(points, width, height):
@@ -121,13 +120,13 @@ def natural_sequence(density, time, width, height):
     matrix0 = bit_matrix(points, width, height)
     #inception = np.append(inception, matrix0)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "natural_sequence")
     for t in range (time):
         new_points = naturally_evolving_points(new_points, width, height)
         new_matrix = bit_matrix(new_points, width, height)
         #inception = np.append(inception, new_matrix)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "natural_sequence")
     return inception
 
 # l = natural_sequence(density,3,width, height)
@@ -159,12 +158,12 @@ def translated_sequence(density, time, width, height):
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "translated_sequence")
     for t in range (time):
         new_points = naturally_evolving_points(new_points, width, height)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "translated_sequence")
     return inception
 
 #translated_sequence(density,20,width, height)
@@ -206,12 +205,12 @@ def translated_sequence_with_outliers(density, time, width, height):
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "translated_sequence_with_outliers")
     for t in range (time):
         new_points = naturally_evolving_points(new_points, width, height)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "translated_sequence_with_outliers")
     return inception
 
 #translated_sequence_with_outliers(density, 20, width, height)
@@ -256,18 +255,18 @@ def translated_sequence_scattering(density, time, width, height, trigger_time, x
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "translated_sequence_scattering")
     for t in range (trigger_time):
         new_points = naturally_evolving_points(new_points, width, height)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "translated_sequence_scattering")
     new_points = np.append(new_points, Point(-1,xg,yg,0,0))
     for t in range (trigger_time, time):
         new_points = scattering_points(new_points, width, height, xg, yg, rg)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "translated_sequence_scattering")
     return inception
 
 # doesn't work properly
@@ -312,18 +311,18 @@ def translated_sequence_gathering(density, time, width, height, trigger_time, xg
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "translated_sequence_gathering")
     for t in range (trigger_time):
         new_points = naturally_evolving_points(new_points, width, height)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "translated_sequence_gathering")
     new_points = np.append(new_points, Point(-1,xg,yg,0,0))
     for t in range (trigger_time, time):
         new_points = gathering_points(new_points, width, height, xg, yg, rg)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "translated_sequence_gathering")
     return inception
 
 #translated_sequence_gathering(density, 20, width, height, 5, 100, 75, 7)
@@ -360,14 +359,14 @@ def moving_hole_translated_sequence(density, time, width, height, xh, yh, rh, sp
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "moving_hole_translated_sequence")
     for t in range (time):
         increase = int(t*increase_rate)
         new_points = naturally_evolving_points(new_points, width, height)
         new_points = keep_out_sequence(new_points, xh+t*speedh, yh, max(0,rh+increase))
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "moving_hole_translated_sequence")
     return inception
 
 #moving_hole_translated_sequence(300, 8, width, height, 100, 75, 30, 0, 0)
@@ -426,13 +425,13 @@ def speed_varying_subset_translated_sequence(density, time, width, height, xv, y
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "speed_varying_subset_translated_sequence")
     for t in range (time):
         new_points = varying_naturally_evolving_points(new_points, width, height,
                                                        xv, yv, rv, speedv + acceleration, acceleration)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "speed_varying_subset_translated_sequence")
     return inception
 
 #speed_varying_subset_translated_sequence(500, 5, width, height, 10, 10, 20, 20, 25)
@@ -492,12 +491,12 @@ def single_file_sequence(density, time, width, height, xf, yf):
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "single_file_sequence")
     for t in range (time):
         new_points = single_file_naturally_evolving_points(new_points, width, height)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "single_file_sequence")
     return inception
 
 #single_file_sequence(200, 10, width, height, 10, 30)
@@ -556,12 +555,12 @@ def row_sequence(density, time, width, height, xr, yr):
     inception = np.zeros((width,height,time))
     matrix0 = bit_matrix(points, width, height)
     inception[:,:,0] = matrix0
-    bitmap(matrix0)
+    bitmap(matrix0, 0, "row_sequence")
     for t in range (time):
         new_points = row_naturally_evolving_points(new_points, width, height)
         new_matrix = bit_matrix(new_points, width, height)
         inception[:,:,t] = new_matrix
-        bitmap(new_matrix)
+        bitmap(new_matrix, t+1, "row_sequence")
     return inception
 
 #row_sequence(300, 10, width, height, 10, 30)
