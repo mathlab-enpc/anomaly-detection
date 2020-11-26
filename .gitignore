@@ -5,3 +5,4 @@ videos
 **/__pycache__
 density_first_derivative
 speed_experiment
+.DS_Store
