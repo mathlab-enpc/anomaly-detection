@@ -1,15 +1,25 @@
 # Crowd anomaly detection
 
 ## Installation
-Run:
+Create a virtual environment:
+```bash
+python3 -m venv ./venv
+source venv/bin/activate
+```
 
+Run:
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Usage
-First generate crowd scenarios:
+To activate your virtual environment, run:
+```bash
+source venv/bin/activate
+```
+you can quit this virtual environment by running `deactivate` in your terminal.
 
+Then, generate crowd scenarios:
 ```bash
 python main.py
 ```
