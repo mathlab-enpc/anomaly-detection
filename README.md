@@ -56,3 +56,4 @@ https://www.oracle.com/java/technologies/javase-jdk15-downloads.html
 python run_netlogo_model.py
 python create_video.py --image-folder experiment_images/netlogo_simul --video-filename netlogo_simul_vid
 ```
+decent guide to netlogo's language : http://ccl.northwestern.edu/netlogo/docs/programming.html#agentsets
