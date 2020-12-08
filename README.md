@@ -46,3 +46,13 @@ python create_video.py --image-folder experiment_images/translated_sequence_gath
 ```
 
 It will generate the file `videos/my_custom_video_filename.mp4` with the sequence of frames stored in `experiment_images/translated_sequence_gathering`.
+
+running a netlogo model and get the output video :
+Beforehand, netlogo and java must be installed : 
+https://ccl.northwestern.edu/netlogo/6.1.1/
+https://www.oracle.com/java/technologies/javase-jdk15-downloads.html
+( and eventually reinstall pynetlogo and JPype1 afterward )
+```bash
+python run_netlogo_model.py
+python create_video.py --image-folder experiment_images/netlogo_simul --video-filename netlogo_simul_vid
+```

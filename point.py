@@ -8,7 +8,7 @@ class Point:
     >>> c = Point(1, 2, 5, 10, 1)
     >>> c.x
     1
-    >>> c.y
+    >>> c.yp = Point(i, x, y, speedx, speedy)
     2
     >>> c.index
     5

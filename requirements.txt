@@ -11,3 +11,9 @@ pytz==2020.4
 scipy==1.5.4
 seaborn==0.11.0
 six==1.15.0
+pynetlogo
+JPype1
+
+
+
+

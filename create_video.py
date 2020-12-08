@@ -23,7 +23,7 @@ for t in range(len(glob.glob(os.path.join(args.image_folder, "*")))):
 
 out = cv2.VideoWriter(
     os.path.join('videos', "{}.mp4".format(args.video_filename)),
-    cv2.VideoWriter_fourcc(*'MP4V'),
+    cv2.VideoWriter_fourcc(*'mp4v'),
     3,
     size
 )

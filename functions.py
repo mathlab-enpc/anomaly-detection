@@ -1,4 +1,4 @@
-from Point import Point
+from point import Point
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
