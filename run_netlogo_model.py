@@ -7,7 +7,7 @@ from functions import bit_matrix, bitmap
 
 
 if __name__ == '__main__':
-    netlogo = pyNetLogo.NetLogoLink(gui=False)
+    netlogo = pyNetLogo.NetLogoLink()
     netlogo.load_model("netlogo_models/Flocking.nlogo")
     netlogo.command("setup")
 
