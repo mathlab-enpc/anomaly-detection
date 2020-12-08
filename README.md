@@ -47,13 +47,42 @@ python create_video.py --image-folder experiment_images/translated_sequence_gath
 
 It will generate the file `videos/my_custom_video_filename.mp4` with the sequence of frames stored in `experiment_images/translated_sequence_gathering`.
 
-running a netlogo model and get the output video :
-Beforehand, netlogo and java must be installed : 
-https://ccl.northwestern.edu/netlogo/6.1.1/
-https://www.oracle.com/java/technologies/javase-jdk15-downloads.html
-( and eventually reinstall pynetlogo and JPype1 afterward )
+## Using a NetLogo model
+Beforehand, NetLogo and Java must be installed: 
+ - [Install NetLogo](https://ccl.northwestern.edu/netlogo/6.1.1/)
+ - [Install Java](https://www.oracle.com/java/technologies/javase-jdk15-downloads.html)
+
+You may need to reinstall PynetLogo and JPype1 after that:
+```bash
+pip uninstall pynetlogo jpype1 && pip install -r requirements.txt
+```
+
+Then, run the following lines to generate the scene:
+
 ```bash
 python run_netlogo_model.py
 python create_video.py --image-folder experiment_images/netlogo_simul --video-filename netlogo_simul_vid
 ```
-decent guide to netlogo's language : http://ccl.northwestern.edu/netlogo/docs/programming.html#agentsets
+
+You can find a decent guide to NetLogo's language [here](http://ccl.northwestern.edu/netlogo/docs/programming.html#agentsets)
+
+
+# Troubleshooting
+Eventually, PyNetLogo may not be able to detect NetLogo's binaries. In that case, you might see the following error message:
+
+```bash
+Traceback (most recent call last):
+  File "run_netlogo_model.py", line 10, in <module>
+    netlogo = pyNetLogo.NetLogoLink()
+  File "/XXXXX/venv/lib/python3.8/site-packages/pyNetLogo/core.py", line 221, in __init__
+    netlogo_version = establish_netlogoversion(netlogo_home)
+  File "/XXXXX/venv/lib/python3.8/site-packages/pyNetLogo/core.py", line 108, in establish_netlogoversion
+    version = match.group()
+AttributeError: 'NoneType' object has no attribute 'group'
+```
+
+You must find the directory where the binary `NetLogo 6.X.X` is stored and edit the arguments passed to the `NetLogoLink` constructor in the file `run_netlogo_model.py`:
+
+```python
+netlogo = pyNetLogo.NetLogoLink(netlogo_home="/path/to/NetLogo/directory/")
+```
