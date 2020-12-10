@@ -564,3 +564,244 @@ def row_sequence(density, time, width, height, xr, yr):
     return inception
 
 #row_sequence(300, 10, width, height, 10, 30)
+
+""" Section 8:
+Marathon setup
+Runners in the middle, compact crowd around
+"""
+
+def initial_marathon_points(density, width, height, runners_proportion, epsilon):
+    points = np.array([])
+    width *= time_length_factor
+    density *= time_length_factor
+    w = int(width/2)
+    epsilon = 1/8
+    n_runners = int(runners_proportion*density)
+    # runners initialization
+    for i in range (n_runners):
+        x = np.random.randint(-w,w)
+        y = np.random.randint(int(height*epsilon), int(height*(1-epsilon)))
+        speedx = round(np.random.normal(average_speedx, trans_speed_std))
+        speedy = round(np.random.normal(0, 2))
+        p = Point(i, x, y, speedx, speedy)
+        points = np.append(points, p)
+    # surrounding crowd initialization
+    for i in range (n_runners, density):
+        x = np.random.randint(-w,w)
+        y = np.random.randint(int(height*epsilon))
+        top = np.random.randint(2)
+        if top == 1:
+            y = np.random.randint(int(height*(1-epsilon)), height)
+        speedx = 0
+        speedy = 0
+        p = Point(i, x, y, speedx, speedy)
+        points = np.append(points, p)
+    return points
+
+def is_in(index, table):
+    for i in range (len(table)):
+        if table[i] == index:
+            return True
+    return False
+
+def marathon_evolving_points(points, width, height, followers, epsilon):
+    for i in range (len(points)):
+        p = points[i]
+        x = p.x0 + round(np.random.normal(p.speedx, 1))
+        y = p.y0 + round(np.random.normal(p.speedy, 1))
+        speedx = p.speedx
+        speedy = p.speedy
+        if is_in(i, followers[0,:]):
+            if y >= height*(1-epsilon):
+                y = y - np.random.randint(average_speedx)
+                speedx = round(np.random.normal(average_speedx, 2))
+            if y <= height*epsilon:
+                y = y + np.random.randint(average_speedx)
+                speedx = round(np.random.normal(average_speedx, 2))
+            if followers[1,i] <= 0:
+                speedx = max(0, speedx - average_speedx/2)
+                if y < height*epsilon + average_speedx:
+                    y = height*epsilon
+                if y > height*(1-epsilon) - average_speedx:
+                    y = height*(1-epsilon)
+        if y > height:
+            y = height
+            speedy = 0
+        if y < 0:
+            y = 0
+            speedy = 0
+        new = Point(i, x, y, speedx, speedy)
+        points[i] = new
+    return points
+
+
+def translated_marathon_sequence(density, time, width, height, runners_proportion, n_followers, epsilon):
+    points = initial_marathon_points(density, width, height, runners_proportion, epsilon)
+    new_points = points
+    inception = np.zeros((width,height,time))
+    matrix0 = bit_matrix(points, width, height)
+    inception[:,:,0] = matrix0
+    bitmap(matrix0, 0, "translated_marathon_sequence")
+    n = int(n_followers)
+    followers = np.zeros((2, n))
+    for i in range (n):
+        followers[0,i] = np.random.randint(n)
+        followers[1,i] = round(np.random.normal(width, 20))
+    for t in range (time):
+        new_points = marathon_evolving_points(new_points, width, height, followers, epsilon)
+        for i in range (n):
+            followers[1,i] -= 1
+        new_matrix = bit_matrix(new_points, width, height)
+        inception[:,:,t] = new_matrix
+        bitmap(new_matrix, t+1, 'translated_marathon_sequence')
+    return inception
+
+#translated_marathon_sequence(200, 10, width, height, 0.25, density/2, 1/8)
+
+""" Section 9:
+Obstacle
+To circumvent
+xo, yo, wo, ho are the (rectangle) obstacle coordinates and dimensions
+"""
+
+def initial_obstacle_points(density, width, height, xo, yo, wo, ho):
+    points = np.array([])
+    width *= time_length_factor
+    density *= time_length_factor
+    w = int(width/2)
+    for i in range (density):
+        x = np.random.randint(-w,w)
+        y = np.random.randint(height)
+        if abs(x-xo) < int(wo/2) and abs(y-yo) < int(ho/2):
+            if y < yo:
+                y = yo - int(ho/2)
+            else:
+                y = yo + int(ho/2)
+        # "rounding corners"
+        if np.sqrt( ( x - xo + int(wo/2))**2 + (y-yo)**2 ) < ho/2:
+            if y < yo:
+                y = yo - x + xo - int(wo/2 + ho/2)
+            else:
+                y = yo + x - xo + int(wo/2 + ho/2)
+        speedx = round(np.random.normal(average_speedx, trans_speed_std))
+        speedy = round(np.random.normal(0, 2))
+        p = Point(i, x, y, speedx, speedy)
+        points = np.append(points, p)
+    return points
+
+def obstacle_evolving_points(points, width, height, xo, yo, wo, ho):
+    for i in range (len(points)):
+        p = points[i]
+        x = p.x0 + round(np.random.normal(p.speedx, 1))
+        y = p.y0 + round(np.random.normal(p.speedy, 1))
+        speedx = p.speedx
+        speedy = p.speedy
+        if y > height:
+            y = height
+            speedy = 0
+        if y < 0:
+            y = 0
+            speedy = 0
+        if abs(x-xo) < int(wo/2) and abs(y-yo) < int(ho/2):
+            if y < yo:
+                y = yo - int(ho/2)
+            else:
+                y = yo + int(ho/2)
+        # "rounding corners"
+        if np.sqrt( ( x - xo + int(wo/2))**2 + (y-yo)**2 ) < ho/2:
+            if y < yo:
+                y = yo - x + xo - int(wo/2 + ho/2)
+            else:
+                y = yo + x - xo + int(wo/2 + ho/2)
+        new = Point(i, x, y, speedx, speedy)
+        points[i] = new
+    return points
+
+def obstacle_sequence(density, time, width, height, xo, yo, wo, ho):
+    points = initial_obstacle_points(density, width, height, xo, yo, wo, ho)
+    new_points = points
+    inception = np.zeros((width,height,time))
+    matrix0 = bit_matrix(points, width, height)
+    inception[:,:,0] = matrix0
+    bitmap(matrix0, 0, 'obstacle_sequence')
+    for t in range (time):
+        new_points = obstacle_evolving_points(new_points, width, height, xo, yo, wo, ho)
+        new_matrix = bit_matrix(new_points, width, height)
+        inception[:,:,t] = new_matrix
+        bitmap(new_matrix, t+1, 'obstacle_sequence')
+    return inception
+
+#obstacle_sequence(density*7, 10, width, height, 70, 30, 60, 30)
+
+
+""" Section 10:
+Military parade
+Very regular ranks and "breaks"
+"""
+
+def initial_parade_points(density, width, height, n_row, n_line, space):
+    # spectators (6*2) + ongoing parade (8*6 + 1)
+    # 5 pixels between each point, i.e. parade width = 30, length = 45, break= 20?
+    points = np.array([])
+    width *= time_length_factor
+    density *= time_length_factor
+    w = int(width/2)
+    interval = (n_row + 1) * space * 2 # 2 = 1 + 1 for the break
+    sitting_interval = 4 * space *3/2
+    for i in range (-w,w):
+        if i % interval < n_row * space and i % space == 0:
+            x = i
+            speedx = average_speedx
+            speedy = 0
+            for j in range (n_line):
+                y = int(height/2) + space * (j - int(n_line/2))
+                p = Point(i, x, y, speedx, speedy)
+                points = np.append(points, p)
+        if i % interval == (n_row + 2) * space:
+            x = i
+            speedx = average_speedx
+            speedy = 0
+            y = int((height - space)/2)
+            p = Point(i, x, y, speedx, speedy)
+            points = np.append(points, p)
+        if i % sitting_interval < 4 * space and i % space == 0:
+            x = i
+            speedx = 0
+            speedy = 0
+            for j in range (2):
+                y = (j+1) * space
+                p = Point(i, x, y, speedx, speedy)
+                points = np.append(points, p)
+            for j in range (2):
+                y = height - (j+1) * space
+                p = Point(i, x, y, speedx, speedy)
+                points = np.append(points, p)
+    return points
+
+
+def parade_evolving_points(points, width, height):
+    for i in range (len(points)):
+        p = points[i]
+        x = p.x0 + p.speedx
+        y = p.y0 + p.speedy
+        speedx = p.speedx
+        speedy = p.speedy
+        new = Point(i, x, y, speedx, speedy)
+        points[i] = new
+    return points
+
+def parade_sequence(density, time, width, height, n_row, n_line, space):
+    points = initial_parade_points(density, width, height, n_row, n_line, space)
+    new_points = points
+    inception = np.zeros((width,height,time))
+    matrix0 = bit_matrix(points, width, height)
+    inception[:,:,0] = matrix0
+    bitmap(matrix0, 0, 'parade_sequence')
+    for t in range (time):
+        new_points = parade_evolving_points(new_points, width, height)
+        new_matrix = bit_matrix(new_points, width, height)
+        inception[:,:,t] = new_matrix
+        bitmap(new_matrix, t+1, 'parade_sequence')
+    return inception
+
+#parade_sequence(density, 10, width, height, 8, 6, 8)
