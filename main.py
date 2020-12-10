@@ -55,6 +55,14 @@ single_file_sequence(200, 10, width, height, 10, 30)
 # Human row
 row_sequence(300, 10, width, height, 10, 30)
 
+# Marathon setup - runners in the middle, surrounding supporters
+translated_marathon_sequence(200, 10, width, height, 0.25, density/2, 1/8)
+
+# Obstacle
+obstacle_sequence(density*7, 10, width, height, 70, 30, 60, 30)
+
+# Military parade
+parade_sequence(density, 10, width, height, 8, 6, 8)
 
 
 
