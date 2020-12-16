@@ -27,6 +27,37 @@ def sobolev_distance(bitmap1, bitmap2, gamma):
     return np.sqrt(1./((n*p)**2) * s)
 
 
+def RMS(X, Y):
+    X = X.flatten()
+    Y = Y.flatten()
+    
+    n = len(X)
+    S = np.dot( (X-Y).T, X-Y)/n
+    S = np.sqrt(S)
+    
+    return S
+
+
+def translation(X, i, j):
+    X = np.roll(X, i, axis=0)
+    X = np.roll(X, j, axis=1)
+    
+    return X
+
+def distance(X, Y):
+    
+    (n,m) = X.shape
+    d_matrix = np.zeros((n,m))
+    
+    for i in range(n):
+        for j in range(m):
+            X_bis = translation(X, i, j)
+            d = RMS(X_bis, Y)
+            d_matrix[i,j] = d
+    
+    return np.min(d_matrix)
+
+
 if __name__ == '__main__':
 
 
